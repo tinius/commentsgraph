@@ -29,9 +29,28 @@ let max = d3.max(data.edges.map(e => e.value))
 console.log(min)
 console.log(max)
 
+let width = el.offsetWidth
+let height = screen.height
+console.log(width)
+
+let force = d3.layout.force()
+  .charge(-60)
+  .linkDistance((l, i) => {
+    return 4//linkScale(max - l.value)
+  })
+  .linkStrength(1)
+  .gravity(0.1)
+  // .linkStrength((link, i) => {
+  //
+  //   let val = Math.pow(exp, -link.value)
+  //   //console.log(linkScale(link.value))
+  //   return linkScale(val)
+  // })
+  .size([width, height])
+
 let linkScale = d3.scale.linear()
   .domain([0, d3.max(data.edges.map(e => e.value))])
-  .range([0, 80])
+  .range([0, 10])
 
 let opacityScale = d3.scale.linear()
   .domain([0, d3.max(data.edges.map(e => e.value))])
@@ -41,54 +60,53 @@ export function init(el, context, config, mediator) {
 
   el.innerHTML = ''
 
-  let width = 800, height = 800
+  let svg = d3.select(el)
+    .append('svg')
+    .attr('height', height)
+    .attr('width', width)
 
-  let force = d3.layout.force()
-    .charge(-20)
-    .linkDistance((l, i) => {
-      return linkScale(max - l.value)
-    })
-    .linkStrength(1)
-    // .linkStrength((link, i) => {
-    //
-    //   let val = Math.pow(exp, -link.value)
-    //   //console.log(linkScale(link.value))
-    //   return linkScale(val)
-    // })
-    .size([width, height])
+  let n = 1
+  updateGraph(svg, n)
+}
 
-  force.on('tick', () => {
-     link
-       .attr('x1', d => d.source.x)
-       .attr('y1', d => d.source.y)
-       .attr('x2', d => d.target.x)
-       .attr('y2', d => d.target.y)
+function updateGraph(svg, n) {
 
-    vertex
-      .attr('cx', d => d.x)
-      .attr('cy', d => d.y)
-    })
+  let dur = 500/Math.pow(1.2, n)
 
   force
     .nodes(data.vertices)
     .links(data.edges)
     .start()
 
+  let v = data.vertices.slice(0,n)
+  let vertex = svg.selectAll('.vertex')
+    .data(v)
 
-  let svg = d3.select(el)
-    .append('svg')
-    .attr('width', width)
-    .attr('height', height)
+  vertex.enter()
+    .append('circle')
+    .attr('r', 5)
+    .attr('class', 'vertex')
+    .style('fill', '#22a')
+    .call(force.drag)
+
+  vertex
+    .exit()
+    .remove()
 
   let link = svg.selectAll('.edge')
-    .data(data.edges)
+    .data(data.edges.slice(0,n-1))
+
+  link
     .enter()
     .append('line')
     .style('stroke-width', e => {
-      return 2//opacityScale(e.value)*10
+      return 2
     })
+    .style('stroke-opacity', 0)
+    //.transition()
+    //.duration(dur)
     .style('stroke-opacity', e => {
-      return opacityScale(e.value)
+      return 0.4//opacityScale(e.value)
     })
     .style('stroke', e => {
       if(e.value === min){
@@ -99,12 +117,27 @@ export function init(el, context, config, mediator) {
       }
       return 'black'
     })
+    .attr('class', 'edge')
 
-  let vertex = svg.selectAll('.vertex')
-    .data(data.vertices)
-    .enter()
-    .append('circle')
-    .attr('r', 5)
-    .style('fill', '#448')
-    .call(force.drag)
+    link
+      .exit()
+      .remove()
+
+    force.on('tick', () => {
+       link
+         .attr('x1', d => d.source.x)
+         .attr('y1', d => d.source.y)
+         .attr('x2', d => d.target.x)
+         .attr('y2', d => d.target.y)
+
+      vertex
+        .attr('cx', d => d.x)
+        .attr('cy', d => d.y)
+      })
+
+  setTimeout(() => {
+    updateGraph(svg, n+1)
+  }, 1000/Math.pow(1.2, n))
+
+
 }
