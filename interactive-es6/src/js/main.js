@@ -3,7 +3,10 @@ import mainHTML from './text/main.html!text'
 import share from './lib/share'
 import d3 from 'd3'
 import _ from 'lodash'
-import data from './interactions.json!'
+import webwewant from './webwewant.json!'
+import crosswords from './crosswords.json!'
+
+var data = window.location.hash === '#web' ? webwewant : crosswords;
 
 var shareFn = share('Interactive title', 'http://gu.com/p/URL', '#Interactive');
 
