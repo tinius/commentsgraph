@@ -10,20 +10,24 @@ var interactions = _(results)
     .flatMap(comment => {
         return (comment.responses || []).map(response => {
             return {
-                'source': comment.userProfile.userId,
-                'replier': response.userProfile.userId,
+                'source': response.userProfile.userId,
+                'replyTo': comment.userProfile.userId,
                 'timestamp': response.isoDateTime,
                 'blocked': response.status === 'blocked'
             };
         }).concat({
             'source': comment.userProfile.userId,
-            'replier': undefined,
             'timestamp': comment.isoDateTime,
             'blocked': comment.status === 'blocked'
         });
     })
-    .filter(interaction => interaction.source !== interaction.replier)
+    .filter(interaction => interaction.source !== interaction.replyTo)
     .sortBy('timestamp')
+    .valueOf();
+
+var blocks = _(interactions)
+    .groupBy('source')
+    .mapValues(user => _.some(user, 'blocked'))
     .valueOf();
 
 var users = [];
@@ -50,11 +54,11 @@ var out = dates.map(start => {
 
     var edges = _(interactions)
         .filter(interaction => range.contains(moment(interaction.timestamp), false))
-        .groupBy(interaction => [interaction.source, interaction.replier].sort().join('-'))
+        .groupBy(interaction => [interaction.source, interaction.replyTo].sort().join('-'))
         .map(userInteractions => {
             var source = getUser(userInteractions[0].source);
-            if (userInteractions[0].replier) {
-                var target = getUser(userInteractions[0].replier);
+            if (userInteractions[0].replyTo) {
+                var target = getUser(userInteractions[0].replyTo);
                 return {
                     source,
                     target,
@@ -67,7 +71,7 @@ var out = dates.map(start => {
         .valueOf();
 
     var newUsers = _.difference(users, existingUsers);
-    var vertices = newUsers.map(user => { return {user}; });
+    var vertices = newUsers.map(user => { return {user, 'blocked': blocks[user]}; });
 
     console.error(start.format(), vertices.length, edges.length);
 
