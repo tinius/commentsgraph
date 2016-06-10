@@ -52,7 +52,8 @@ function getComments(shortUrl, page=1) {
     });
 }
 
-getContent().then(articles => {
+/*getContent().then(articles => {
+    console.error(`${articles.length} articles`);
     var promises = articles.map(article => {
         var shortUrl = article.fields.shortUrl.replace('http://gu.com/', '');
         return getComments(shortUrl).then(comments => { return {article, comments}});
@@ -60,6 +61,13 @@ getContent().then(articles => {
 
     return Promise.all(promises);
 }).then(results => {
+    console.log(JSON.stringify(results));
+}).catch(err => {
+    console.error(err);
+});*/
+
+getComments('p/4hp57').then(comments => {
+    var results = [{'article': {}, comments}];
     console.log(JSON.stringify(results));
 }).catch(err => {
     console.error(err);
