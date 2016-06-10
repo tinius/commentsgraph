@@ -13,7 +13,7 @@ let min = 1//d3.min(data.edges.map(e => e.value))
 let max = 1//d3.max(data.edges.map(e => e.value))
 
 let width = el.offsetWidth
-let height = screen.height
+let height = screen.height*0.8
 
 let force = d3.layout.force()
   .charge(-60)
@@ -42,6 +42,18 @@ export function init(el, context, config, mediator) {
 
   el.innerHTML = ''
 
+  let hb = d3.select(el)
+    .append('div')
+    .attr('id', 'header-box')
+
+  hb
+    .append('h2')
+    .html('Comments on all crosswords')
+  hb
+    .append('h3')
+    .attr('id', 'timer')
+    .html('')
+
   let svg = d3.select(el)
     .append('svg')
     .attr('height', height)
@@ -60,7 +72,8 @@ export function init(el, context, config, mediator) {
 
 function updateGraph(edges, vertices, n) {
 
-  //let dur = 500/Math.pow(1.2, n)
+  d3.select('#timer')
+    .html(n)
 
   if(n>=1){
     data[n].vertices = data[n-1].vertices.concat(data[n].vertices)
@@ -141,7 +154,7 @@ function updateGraph(edges, vertices, n) {
   if(n < data.length){
     setTimeout(() => {
       updateGraph(edges, vertices, n+1)
-    }, 150)
+    }, 20)
   }
 
 }

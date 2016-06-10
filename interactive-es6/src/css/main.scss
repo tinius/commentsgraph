@@ -3,3 +3,11 @@
 @import "mq";
 @import "general";
 @import "share";
+
+#header-box {
+  margin: auto;
+}
+
+#header-box h2, #header-box h3 {
+  text-align: center;
+}
