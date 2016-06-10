@@ -7,31 +7,13 @@ import data from './interactions.json!'
 
 var shareFn = share('Interactive title', 'http://gu.com/p/URL', '#Interactive');
 
-let testData = {
-  vertices : [
-    { user : 'a' },
-    { user : 'b' },
-    { user : 'c' }
-  ],
-  edges : [
-    { 'source' : 0, 'target' : 1, 'value' : 10 },
-    { 'source' : 1, 'target' : 2, 'value' : 9 },
-    { 'source' : 0, 'target' : 2, 'value' : 5 }
-  ]
-}
-
-console.log(data)
-
 let exp = 2
 
-let min = d3.min(data.edges.map(e => e.value))
-let max = d3.max(data.edges.map(e => e.value))
-console.log(min)
-console.log(max)
+let min = 1//d3.min(data.edges.map(e => e.value))
+let max = 1//d3.max(data.edges.map(e => e.value))
 
 let width = el.offsetWidth
 let height = screen.height
-console.log(width)
 
 let force = d3.layout.force()
   .charge(-60)
@@ -48,13 +30,13 @@ let force = d3.layout.force()
   // })
   .size([width, height])
 
-let linkScale = d3.scale.linear()
-  .domain([0, d3.max(data.edges.map(e => e.value))])
-  .range([0, 10])
-
-let opacityScale = d3.scale.linear()
-  .domain([0, d3.max(data.edges.map(e => e.value))])
-  .range([0.05, 0.6])
+// let linkScale = d3.scale.linear()
+//   .domain([0, d3.max(data.edges.map(e => e.value))])
+//   .range([0, 10])
+//
+// let opacityScale = d3.scale.linear()
+//   .domain([0, d3.max(data.edges.map(e => e.value))])
+//   .range([0.05, 0.6])
 
 export function init(el, context, config, mediator) {
 
@@ -65,21 +47,38 @@ export function init(el, context, config, mediator) {
     .attr('height', height)
     .attr('width', width)
 
-  let n = 1
-  updateGraph(svg, n)
+  let edges = svg
+    .append('g')
+    .attr('id', 'edges')
+  let vertices = svg
+    .append('g')
+    .attr('id', 'vertices')
+
+  let n = 0
+  updateGraph(edges, vertices, n)
 }
 
-function updateGraph(svg, n) {
+function updateGraph(edges, vertices, n) {
 
-  let dur = 500/Math.pow(1.2, n)
+  //let dur = 500/Math.pow(1.2, n)
+
+  if(n>=1){
+    data[n].vertices = data[n-1].vertices.concat(data[n].vertices)
+    data[n].edges = data[n-1].edges.concat(data[n].edges)
+  }
+
+  console.log(data[n].vertices)
+  console.log(data[n].edges)
 
   force
-    .nodes(data.vertices)
-    .links(data.edges)
+    .nodes(data[n].vertices)
+    .links(data[n].edges)
     .start()
 
-  let link = svg.selectAll('.edge')
-    .data(data.edges.slice(0,n-1))
+  console.log(n)
+
+  let link = edges.selectAll('.edge')
+    .data(data[n].edges)
 
   link
     .enter()
@@ -88,17 +87,17 @@ function updateGraph(svg, n) {
       return 2
     })
     .style('stroke-opacity', 0)
-    .transition()
-    .duration(dur)
+    //.transition()
+    //.duration(dur)
     .style('stroke-opacity', e => {
-      return 0.4//opacityScale(e.value)
+      return 0.1//opacityScale(e.value)
     })
     .style('stroke', e => 'black')
     .attr('class', 'edge')
 
-    link
-      .exit()
-      .remove()
+    //link
+    //  .exit()
+    //  .remove()
 
   force.on('tick', () => {
     link
@@ -112,15 +111,15 @@ function updateGraph(svg, n) {
       .attr('cy', d => d.y)
     })
 
-    let v = data.vertices.slice(0,n)
+    let v = data[n].vertices
 
     //briefly remove all vertices to have them re-enter on top of edges
-    svg.selectAll('.vertex')
-      .data([])
-      .exit()
-      .remove()
+    // svg.selectAll('.vertex')
+    //   .data([])
+    //   .exit()
+    //   .remove()
 
-    let vertex = svg.selectAll('.vertex')
+    let vertex = vertices.selectAll('.vertex')
       .data(v)
 
     vertex.enter()
@@ -130,7 +129,7 @@ function updateGraph(svg, n) {
       //.duration(dur)
       .attr('r', 5)
       .attr('class', 'vertex')
-      .style('fill', '#22a')
+      .style('fill', d => '#005689')
 
     vertex
       .call(force.drag)
@@ -139,10 +138,10 @@ function updateGraph(svg, n) {
       .exit()
       .remove()
 
-  if(n < data.vertices.length){
+  if(n < data.length){
     setTimeout(() => {
-      updateGraph(svg, n+1)
-    }, 1000/Math.pow(1.2, n))
+      updateGraph(edges, vertices, n+1)
+    }, 150)
   }
 
 }
