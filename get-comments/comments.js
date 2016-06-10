@@ -38,7 +38,7 @@ function getContent(page=1) {
 }
 
 function getComments(shortUrl, page=1) {
-    var uri = `${discussionUrl}${shortUrl}?${discussionParams}`;
+    var uri = `${discussionUrl}${shortUrl}?${discussionParams}&page=${page}`;
     return limiter.schedule(rp, {uri, 'json': true}).then(data => {
         console.error(uri);
         var comments = data.discussion.comments;

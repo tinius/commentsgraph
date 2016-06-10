@@ -89,10 +89,8 @@ function updateGraph(edges, vertices, n) {
     .style('stroke-opacity', 0)
     //.transition()
     //.duration(dur)
-    .style('stroke-opacity', e => {
-      return 0.1//opacityScale(e.value)
-    })
-    .style('stroke', e => 'black')
+    .style('stroke-opacity', e => e.blocked ? 0.8 : 0.1)
+    .style('stroke', e => e.blocked ? 'red' : 'black')
     .attr('class', 'edge')
 
     //link
@@ -129,7 +127,7 @@ function updateGraph(edges, vertices, n) {
       //.duration(dur)
       .attr('r', 5)
       .attr('class', 'vertex')
-      .style('fill', d => '#005689')
+      .style('fill', '#005689')
 
     vertex
       .call(force.drag)

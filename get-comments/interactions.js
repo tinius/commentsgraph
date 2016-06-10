@@ -8,13 +8,18 @@ var results = JSON.parse(rw.readFileSync('/dev/stdin'));
 var interactions = _(results)
     .flatMap(result => result.comments)
     .flatMap(comment => {
-        return (comment.responses || []).map(response => { 
+        return (comment.responses || []).map(response => {
             return {
                 'source': comment.userProfile.userId,
                 'replier': response.userProfile.userId,
                 'timestamp': response.isoDateTime,
                 'blocked': response.status === 'blocked'
             };
+        }).concat({
+            'source': comment.userProfile.userId,
+            'replier': undefined,
+            'timestamp': comment.isoDateTime,
+            'blocked': comment.status === 'blocked'
         });
     })
     .filter(interaction => interaction.source !== interaction.replier)
@@ -48,9 +53,17 @@ var out = dates.map(start => {
         .groupBy(interaction => [interaction.source, interaction.replier].sort().join('-'))
         .map(userInteractions => {
             var source = getUser(userInteractions[0].source);
-            var target = getUser(userInteractions[0].replier);
-            return {source, target, 'value': userInteractions.length};
+            if (userInteractions[0].replier) {
+                var target = getUser(userInteractions[0].replier);
+                return {
+                    source,
+                    target,
+                    'value': userInteractions.length,
+                    'blocked': _.some(userInteractions, 'blocked')
+                };
+            }
         })
+        .filter(edge => edge)
         .valueOf();
 
     var newUsers = _.difference(users, existingUsers);
