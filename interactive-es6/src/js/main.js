@@ -5,8 +5,10 @@ import d3 from 'd3'
 import _ from 'lodash'
 import webwewant from './webwewant.json!'
 import crosswords from './crosswords.json!'
+import moment from 'moment'
 
 var data = window.location.hash === '#web' ? webwewant : crosswords;
+var title = window.location.hash === '#web' ? '"The Web We Want"' : 'all crosswords';
 
 var shareFn = share('Interactive title', 'http://gu.com/p/URL', '#Interactive');
 
@@ -51,7 +53,7 @@ export function init(el, context, config, mediator) {
 
   hb
     .append('h2')
-    .html('Comments on all crosswords')
+    .html('Comments on ' + title)
   hb
     .append('h3')
     .attr('id', 'timer')
@@ -76,7 +78,7 @@ export function init(el, context, config, mediator) {
 function updateGraph(edges, vertices, n) {
 
   d3.select('#timer')
-    .html(n)
+    .html(moment(data[n].start).format('dddd D MMMM, HH:mm'));
 
   if(n>=1){
     data[n].vertices = data[n-1].vertices.concat(data[n].vertices)
@@ -105,7 +107,7 @@ function updateGraph(edges, vertices, n) {
     .style('stroke-opacity', 0)
     //.transition()
     //.duration(dur)
-    .style('stroke-opacity', e => e.blocked ? 0.8 : 0.1)
+    .style('stroke-opacity', e => e.blocked ? 0.8 : 0.3)
     .style('stroke', e => e.blocked ? 'red' : 'black')
     .attr('class', 'edge')
 
@@ -155,7 +157,7 @@ function updateGraph(edges, vertices, n) {
   if(n < data.length){
     setTimeout(() => {
       updateGraph(edges, vertices, n+1)
-    }, 200)
+    }, 50)
   }
 
 }

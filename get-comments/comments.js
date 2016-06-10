@@ -14,7 +14,7 @@ const contentParams = encodeParams({
     'tag': process.argv[2],
     'from-date': moment().subtract(7, 'days').format('YYYY-MM-DD'),
     'page-size': 100,
-    'api-key': 'gnm-hackday',
+    'api-key': 'gnm-hackday-2016',
     'show-fields': 'shortUrl'
 });
 
@@ -52,7 +52,7 @@ function getComments(shortUrl, page=1) {
     });
 }
 
-/*getContent().then(articles => {
+getContent().then(articles => {
     console.error(`${articles.length} articles`);
     var promises = articles.map(article => {
         var shortUrl = article.fields.shortUrl.replace('http://gu.com/', '');
@@ -64,11 +64,11 @@ function getComments(shortUrl, page=1) {
     console.log(JSON.stringify(results));
 }).catch(err => {
     console.error(err);
-});*/
+});
 
-getComments('p/4hp57').then(comments => {
+/*getComments('p/4hp57').then(comments => {
     var results = [{'article': {}, comments}];
     console.log(JSON.stringify(results));
 }).catch(err => {
     console.error(err);
-});
+});*/
