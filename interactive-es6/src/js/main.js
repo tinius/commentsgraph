@@ -78,21 +78,6 @@ function updateGraph(svg, n) {
     .links(data.edges)
     .start()
 
-  let v = data.vertices.slice(0,n)
-  let vertex = svg.selectAll('.vertex')
-    .data(v)
-
-  vertex.enter()
-    .append('circle')
-    .attr('r', 5)
-    .attr('class', 'vertex')
-    .style('fill', '#22a')
-    .call(force.drag)
-
-  vertex
-    .exit()
-    .remove()
-
   let link = svg.selectAll('.edge')
     .data(data.edges.slice(0,n-1))
 
@@ -103,41 +88,61 @@ function updateGraph(svg, n) {
       return 2
     })
     .style('stroke-opacity', 0)
-    //.transition()
-    //.duration(dur)
+    .transition()
+    .duration(dur)
     .style('stroke-opacity', e => {
       return 0.4//opacityScale(e.value)
     })
-    .style('stroke', e => {
-      if(e.value === min){
-        return 'red'
-      }
-      else if(e.value === max){
-        return 'green'
-      }
-      return 'black'
-    })
+    .style('stroke', e => 'black')
     .attr('class', 'edge')
 
     link
       .exit()
       .remove()
 
-    force.on('tick', () => {
-       link
-         .attr('x1', d => d.source.x)
-         .attr('y1', d => d.source.y)
-         .attr('x2', d => d.target.x)
-         .attr('y2', d => d.target.y)
+  force.on('tick', () => {
+    link
+    .attr('x1', d => d.source.x)
+    .attr('y1', d => d.source.y)
+    .attr('x2', d => d.target.x)
+    .attr('y2', d => d.target.y)
 
-      vertex
-        .attr('cx', d => d.x)
-        .attr('cy', d => d.y)
-      })
+    vertex
+      .attr('cx', d => d.x)
+      .attr('cy', d => d.y)
+    })
 
-  setTimeout(() => {
-    updateGraph(svg, n+1)
-  }, 1000/Math.pow(1.2, n))
+    let v = data.vertices.slice(0,n)
 
+    //briefly remove all vertices to have them re-enter on top of edges
+    svg.selectAll('.vertex')
+      .data([])
+      .exit()
+      .remove()
+
+    let vertex = svg.selectAll('.vertex')
+      .data(v)
+
+    vertex.enter()
+      .append('circle')
+      //.attr('r', 1)
+      //.transition()
+      //.duration(dur)
+      .attr('r', 5)
+      .attr('class', 'vertex')
+      .style('fill', '#22a')
+
+    vertex
+      .call(force.drag)
+
+    vertex
+      .exit()
+      .remove()
+
+  if(n < data.vertices.length){
+    setTimeout(() => {
+      updateGraph(svg, n+1)
+    }, 1000/Math.pow(1.2, n))
+  }
 
 }
