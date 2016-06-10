@@ -152,7 +152,7 @@ function updateGraph(edges, vertices, n) {
   if(n < data.length){
     setTimeout(() => {
       updateGraph(edges, vertices, n+1)
-    }, 20)
+    }, 200)
   }
 
 }
