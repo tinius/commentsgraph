@@ -127,7 +127,7 @@ function updateGraph(edges, vertices, n) {
       //.duration(dur)
       .attr('r', 5)
       .attr('class', 'vertex')
-      .style('fill', '#005689')
+      .style('fill', v => v.blocked ? 'red' : '#005689')
 
     vertex
       .call(force.drag)
